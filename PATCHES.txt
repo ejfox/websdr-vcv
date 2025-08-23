@@ -1,0 +1,50 @@
+websdr patches
+--------------
+
+// ghost in the machine
+websdr -> clouds (freeze) -> rings -> reverb
+         ^
+    random gates
+
+// scanner darkly  
+clock -> sequential switch -> websdr gate inputs 1-8
+websdr -> filter (resonant) -> delay -> out
+
+// numbers station sampler
+websdr -> comparator -> sample & hold -> quantizer -> oscillator v/oct
+        signal strength -> envelope follower -> vca
+
+// carrier pigeon
+websdr carrier detect -> adsr -> filter cutoff
+websdr audio -> filter -> distortion -> out
+
+// frequency hunter
+lfo (slow triangle) -> websdr freq cv input
+websdr -> bandpass -> compressor -> out
+
+// sideband slicer
+websdr audio -> frequency shifter -> vca -> out
+              ^                        ^
+         lfo (audio rate)         websdr signal strength
+
+// radio telescope
+websdr + expander -> spectrum out (poly) -> oscillator bank v/oct (16x)
+                                           -> mixer -> out
+
+// emergency broadcast
+websdr signal strength -> comparator (threshold) -> trigger
+                                                    v
+                                              sample player ("alert")
+websdr audio -> vca -> out
+              ^
+         inverse envelope
+
+// shortwave shimmer
+websdr -> granular (small grains) -> pitch shift (+12) -> reverb
+                                   -> pitch shift (-12) -> reverb
+                                                         -> mix
+
+// ionosphere bounce
+websdr -> delay (long) -> pitch shift (slight detune) -> feedback -> out
+        ^
+    lfo (very slow)
