@@ -1,0 +1,45 @@
+websdr
+------
+
+stream radio into your modular
+
+what:
+vcv/cardinal plugin that connects to kiwisdr servers. real radio, real-time.
+currently hardcoded to kiwisdr.ve6slp.ca:8073 (canada). works though.
+
+build:
+  git clone https://github.com/VCVRack/Rack.git Rack-SDK
+  cd Rack-SDK && make dep
+  export RACK_DIR=../Rack-SDK
+  make
+
+install:
+  cp -r dist/WebSDR ~/Documents/Cardinal/plugins/
+
+use:
+  - loads, connects automatically
+  - green light = streaming
+  - tune with freq knob (0-30mhz)
+  - 8 preset slots - click once to save, click again to recall
+  - 4 gate inputs for presets 2,4,6,8
+  - audio out -> anywhere
+
+frequencies worth trying:
+  3.750    80m amateur
+  7.055    40m amateur 
+  7.200    40m ssb
+  14.230   20m amateur
+  21.200   15m amateur
+  28.400   10m amateur
+
+best reception at night for lower frequencies
+
+tested:
+  - macos 10.15+
+  - cardinal 24.10
+  - vcv rack 2.4.1
+
+websocket -> kiwisdr protocol -> 12khz pcm -> resample -> cv out
+real radio. no simulation.
+
+gpl3+

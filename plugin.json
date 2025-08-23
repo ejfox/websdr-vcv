@@ -1,0 +1,44 @@
+{
+  "slug": "WebSDR",
+  "name": "WebSDR Integration",
+  "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "WebSDR",
+  "author": "WebSDR Plugin Contributors",
+  "authorEmail": "contact@example.com",
+  "authorUrl": "",
+  "pluginUrl": "https://github.com/yourusername/cardinalsynth-websdr",
+  "manualUrl": "https://github.com/yourusername/cardinalsynth-websdr/wiki",
+  "sourceUrl": "https://github.com/yourusername/cardinalsynth-websdr",
+  "donateUrl": "",
+  "changelogUrl": "https://github.com/yourusername/cardinalsynth-websdr/releases",
+  "description": "WebSDR integration plugin for Cardinal/VCV Rack - Stream live radio signals into your modular patches",
+  "tags": [
+    "External",
+    "Oscillator",
+    "Sampler",
+    "Hardware clone",
+    "Utility"
+  ],
+  "modules": [
+    {
+      "slug": "WebSDRReceiver",
+      "name": "WebSDR Receiver",
+      "description": "Stream live radio signals from WebSDR servers",
+      "tags": [
+        "External",
+        "Oscillator",
+        "Sampler"
+      ]
+    },
+    {
+      "slug": "SpectrumAnalyzer",
+      "name": "Spectrum Analyzer",
+      "description": "Display spectrum and waterfall of WebSDR streams",
+      "tags": [
+        "Visual",
+        "Analyzer"
+      ]
+    }
+  ]
+}
