@@ -39,6 +39,15 @@
         "Visual",
         "Analyzer"
       ]
+    },
+    {
+      "slug": "StationScanner",
+      "name": "Station Scanner",
+      "description": "Automatically scan through shortwave stations",
+      "tags": [
+        "Sequencer",
+        "Utility"
+      ]
     }
   ]
 }

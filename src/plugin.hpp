@@ -7,3 +7,4 @@ extern Plugin* pluginInstance;
 
 extern Model* modelWebSDRReceiver;
 extern Model* modelSpectrumAnalyzer;
+extern Model* modelStationScanner;

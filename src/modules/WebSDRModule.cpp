@@ -1,5 +1,6 @@
 #include "../plugin.hpp"
 #include "../network/WebSDRClient.hpp"
+#include "stations.hpp"
 #include <cmath>
 #include <cstring>
 #include <algorithm>
@@ -59,15 +60,38 @@ struct WebSDRModule : Module {
         configParam(GAIN_PARAM, 0.0f, 2.0f, 1.0f, "Gain");
         configParam(MODE_PARAM, 0.0f, 4.0f, 0.0f, "Mode");
         
-        // Configure preset buttons
+        // Configure preset buttons with pre-programmed stations
         for (int i = 0; i < NUM_PRESETS; i++) {
             configButton(PRESET_PARAM + i, string::f("Preset %d", i + 1));
             configInput(PRESET_GATE_INPUT + i, string::f("Preset %d gate", i + 1));
             configLight(PRESET_LIGHT + i, string::f("Preset %d", i + 1));
             
-            // Initialize with some default frequencies
-            presetFrequencies[i] = 0.0f;
-            presetSaved[i] = false;
+            // Initialize with popular stations
+            if (i == 0) {
+                presetFrequencies[i] = 5000000;  // WWV 5 MHz time signal
+                presetSaved[i] = true;
+            } else if (i == 1) {
+                presetFrequencies[i] = 9410000;  // BBC World Service
+                presetSaved[i] = true;
+            } else if (i == 2) {
+                presetFrequencies[i] = 7200000;  // 40m amateur radio
+                presetSaved[i] = true;
+            } else if (i == 3) {
+                presetFrequencies[i] = 14230000; // 20m amateur radio
+                presetSaved[i] = true;
+            } else if (i == 4) {
+                presetFrequencies[i] = 4625000;  // UVB-76 "The Buzzer"
+                presetSaved[i] = true;
+            } else if (i == 5) {
+                presetFrequencies[i] = 6925000;  // Pirate radio
+                presetSaved[i] = true;
+            } else if (i == 6) {
+                presetFrequencies[i] = 11175000; // HFGCS military
+                presetSaved[i] = true;
+            } else if (i == 7) {
+                presetFrequencies[i] = 3330000;  // CHU Canada time
+                presetSaved[i] = true;
+            }
         }
         
         configOutput(AUDIO_OUTPUT, "Audio");
@@ -227,12 +251,102 @@ struct WebSDRModule : Module {
         lastSample = 0.0f;
         resamplePhase = 0.0f;
         
-        // Clear presets
-        for (int i = 0; i < NUM_PRESETS; i++) {
-            presetFrequencies[i] = 0.0f;
-            presetSaved[i] = false;
-            presetLightBrightness[i] = 0.0f;
-        }
+        // Don't clear presets on reset - keep the station presets
+    }
+    
+    // Context menu for station browser
+    void appendContextMenu(Menu* menu) override {
+        menu->addChild(new MenuSeparator);
+        menu->addChild(createMenuLabel("Quick Tune"));
+        
+        // Station browser submenu
+        struct StationItem : MenuItem {
+            WebSDRModule* module;
+            const Station* station;
+            void onAction(const event::Action& e) override {
+                module->params[FREQ_PARAM].setValue(station->freq);
+                module->client.setFrequency(station->freq);
+                
+                // Set appropriate mode
+                if (strcmp(station->mode, "usb") == 0) {
+                    module->params[MODE_PARAM].setValue(2.0f);
+                } else if (strcmp(station->mode, "lsb") == 0) {
+                    module->params[MODE_PARAM].setValue(3.0f);
+                } else {
+                    module->params[MODE_PARAM].setValue(0.0f);  // AM
+                }
+            }
+        };
+        
+        // Time signals
+        menu->addChild(createSubmenuItem("Time Signals", "", [=](Menu* menu) {
+            for (int i = 0; i < NUM_STATIONS; i++) {
+                if (strstr(STATIONS[i].name, "wwv") || strstr(STATIONS[i].name, "chv")) {
+                    StationItem* item = new StationItem;
+                    item->text = string::f("%s (%.3f MHz)", STATIONS[i].name, STATIONS[i].freq / 1000000.0f);
+                    item->rightText = STATIONS[i].time;
+                    item->module = this;
+                    item->station = &STATIONS[i];
+                    menu->addChild(item);
+                }
+            }
+        }));
+        
+        // International broadcasters
+        menu->addChild(createSubmenuItem("International Radio", "", [=](Menu* menu) {
+            for (int i = 0; i < NUM_STATIONS; i++) {
+                if (strstr(STATIONS[i].name, "bbc") || strstr(STATIONS[i].name, "voa") || 
+                    strstr(STATIONS[i].name, "rhc") || strstr(STATIONS[i].name, "cri")) {
+                    StationItem* item = new StationItem;
+                    item->text = string::f("%s (%.3f MHz)", STATIONS[i].name, STATIONS[i].freq / 1000000.0f);
+                    item->rightText = STATIONS[i].time;
+                    item->module = this;
+                    item->station = &STATIONS[i];
+                    menu->addChild(item);
+                }
+            }
+        }));
+        
+        // Amateur radio
+        menu->addChild(createSubmenuItem("Amateur Radio", "", [=](Menu* menu) {
+            for (int i = 0; i < NUM_STATIONS; i++) {
+                if (strstr(STATIONS[i].name, "ssb") || strstr(STATIONS[i].name, "ft8")) {
+                    StationItem* item = new StationItem;
+                    item->text = string::f("%s (%.3f MHz)", STATIONS[i].name, STATIONS[i].freq / 1000000.0f);
+                    item->rightText = STATIONS[i].time;
+                    item->module = this;
+                    item->station = &STATIONS[i];
+                    menu->addChild(item);
+                }
+            }
+        }));
+        
+        // Mystery stations
+        menu->addChild(createSubmenuItem("Mystery Stations", "", [=](Menu* menu) {
+            for (int i = 0; i < NUM_STATIONS; i++) {
+                if (strstr(STATIONS[i].name, "uvb") || strstr(STATIONS[i].name, "hfgcs") || 
+                    strstr(STATIONS[i].name, "pirate")) {
+                    StationItem* item = new StationItem;
+                    item->text = string::f("%s (%.3f MHz)", STATIONS[i].name, STATIONS[i].freq / 1000000.0f);
+                    item->rightText = STATIONS[i].time;
+                    item->module = this;
+                    item->station = &STATIONS[i];
+                    menu->addChild(item);
+                }
+            }
+        }));
+        
+        // All stations
+        menu->addChild(createSubmenuItem("All Stations", "", [=](Menu* menu) {
+            for (int i = 0; i < NUM_STATIONS; i++) {
+                StationItem* item = new StationItem;
+                item->text = string::f("%s (%.3f MHz)", STATIONS[i].name, STATIONS[i].freq / 1000000.0f);
+                item->rightText = STATIONS[i].time;
+                item->module = this;
+                item->station = &STATIONS[i];
+                menu->addChild(item);
+            }
+        }));
     }
     
     json_t* dataToJson() override {
@@ -288,13 +402,24 @@ struct FrequencyDisplay : Widget {
             float freq = module->params[WebSDRModule::FREQ_PARAM].getValue();
             float freqMhz = freq / 1000000.0f;
             
-            std::stringstream ss;
-            ss << std::fixed << std::setprecision(3) << freqMhz << " MHz";
+            // Check if we're near a known station
+            const Station* station = findNearestStation(freq);
             
             nvgFontSize(args.vg, 11);
             nvgFillColor(args.vg, nvgRGB(0, 255, 100));
             nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-            nvgText(args.vg, box.size.x / 2, box.size.y / 2, ss.str().c_str(), NULL);
+            
+            // Show frequency
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(3) << freqMhz << " MHz";
+            nvgText(args.vg, box.size.x / 2, box.size.y / 2 - 6, ss.str().c_str(), NULL);
+            
+            // Show station name if close enough
+            if (station && fabsf(station->freq - freq) < 5000) {  // within 5 kHz
+                nvgFontSize(args.vg, 9);
+                nvgFillColor(args.vg, nvgRGB(0, 200, 80));
+                nvgText(args.vg, box.size.x / 2, box.size.y / 2 + 6, station->name, NULL);
+            }
         }
     }
 };

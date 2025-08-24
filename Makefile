@@ -15,6 +15,7 @@ NAME = WebSDR
 SOURCES += src/plugin.cpp
 SOURCES += src/modules/WebSDRModule.cpp
 SOURCES += src/modules/SpectrumAnalyzer.cpp
+SOURCES += src/modules/StationScanner.cpp
 SOURCES += src/network/WebSDRClient.cpp
 
 # Compiler flags
